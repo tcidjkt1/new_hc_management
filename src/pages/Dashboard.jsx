@@ -7,24 +7,11 @@ import KpiCards from '../components/dashboard/KpiCards'
 import AttritionChart from '../components/dashboard/AttritionChart'
 import Top10Table from '../components/dashboard/Top10Table'
 import SummaryCards from '../components/dashboard/SummaryCards'
-
-const ROWS = [
-  { k: 'startingHC', label: 'Starting HC',                           cls: 'bg-green-50 font-medium' },
-  { k: 'intAttr',    label: 'Internal Attrition other Project/Dept (-)', cls: 'text-red-600'  },
-  { k: 'extCMC',     label: 'Attrition (Company Matter) Contract (-)',   cls: 'text-red-600'  },
-  { k: 'extEMC',     label: 'Attrition (Employee Matter) Contract (-)',  cls: 'text-red-600'  },
-  { k: 'extCMDW',    label: 'Attrition (Company Matter) DW (-)',         cls: 'text-red-600'  },
-  { k: 'extEMDW',    label: 'Attrition (Employee Matter) DW (-)',        cls: 'text-red-600'  },
-  { k: 'nhC',        label: 'New Hire (Contract) (+)',                   cls: 'text-green-600' },
-  { k: 'nhDW',       label: 'New Hire (Daily Worker) (+)',               cls: 'text-green-600' },
-  { k: 'nhMut',      label: 'New Hire (Mutation) (+)',                   cls: 'text-green-600' },
-  { k: 'endingHC',   label: 'Ending HC',                                cls: 'bg-green-100 font-semibold' },
-  { k: 'attrPct',    label: 'Attrition %',                             cls: 'bg-gray-50 font-medium', pct: true },
-  { k: 'totalAttr',  label: 'Total Attrition',                         cls: 'bg-gray-50 font-medium' },
-]
+import HcMovementTable from '../components/dashboard/HcMovementTable'
 
 export default function Dashboard() {
-  const { activeData, logData, loading, error } = useHcData()
+  const { activeData, logData, loading, error, progress } = useHcData()
+
 
   const [fromDate, setFromDate]   = useState('2026-01-01')
   const [untilDate, setUntilDate] = useState('2026-05-31')
@@ -64,14 +51,17 @@ export default function Dashboard() {
     setApplied({ results, fromS: months[0].S, untilS: months[months.length - 1].E })
   }
 
-  if (loading) return (
-    <div className="flex items-center justify-center h-full">
-      <div className="text-center">
-        <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-        <p className="text-sm text-gray-500">Memuat data dari Supabase...</p>
-      </div>
+if (loading) return (
+  <div className="flex items-center justify-center h-full">
+    <div className="text-center">
+      <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+      <p className="text-sm text-gray-500">{progress || 'Memuat data dari Supabase...'}</p>
+      <p className="text-xs text-gray-400 mt-1">
+        {activeData.length > 0 && `${activeData.length} active · ${logData.length} log dimuat`}
+      </p>
     </div>
-  )
+  </div>
+)
 
   if (error) return (
     <div className="p-6">
@@ -137,36 +127,19 @@ export default function Dashboard() {
             />
           </div>
 
-          {/* Tabel per bulan */}
+          {/* Tabel HC Movement per Bulan */}
           <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-            <div className="px-4 py-3 border-b border-gray-200">
-              <h3 className="text-sm font-medium text-gray-700">Tabel Metrik per Bulan</h3>
+            <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+              <h3 className="text-sm font-medium text-gray-700">Tabel HC Movement per Bulan</h3>
+              <p className="text-xs text-gray-400">Klik baris "Supporting Staff" untuk expand/collapse per posisi</p>
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs">
-                <thead>
-                  <tr className="bg-gray-50">
-                    <th className="text-left px-4 py-2 text-gray-500 font-medium min-w-[220px] border-b border-gray-200">Notes</th>
-                    {applied.results.map(r => (
-                      <th key={r.label} className="px-3 py-2 text-gray-500 font-medium whitespace-nowrap border-b border-gray-200 text-center">
-                        {r.label}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {ROWS.map(row => (
-                    <tr key={row.k} className="border-b border-gray-100 last:border-0">
-                      <td className={`px-4 py-2 ${row.cls || 'text-gray-600'}`}>{row.label}</td>
-                      {applied.results.map(r => (
-                        <td key={r.label} className={`px-3 py-2 text-center ${row.cls || ''}`}>
-                          {row.pct ? r[row.k].toFixed(2) + '%' : r[row.k]}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="p-4">
+              <HcMovementTable
+                results={applied.results}
+                filters={filters}
+                activeData={activeData}
+                logData={logData}
+              />
             </div>
           </div>
         </>

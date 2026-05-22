@@ -1,7 +1,17 @@
 // Konversi tanggal string ke Excel serial number
+// Supports ISO (YYYY-MM-DD), DD/MM/YYYY, and Excel serial number (number)
 export function dateToSerial(dateStr) {
-  if (!dateStr) return null
-  const d = new Date(dateStr + 'T00:00:00Z')
+  if (dateStr === null || dateStr === undefined || dateStr === '') return null
+  // Already a number (Excel serial)
+  if (typeof dateStr === 'number') return dateStr
+  let str = String(dateStr).trim()
+  // DD/MM/YYYY → YYYY-MM-DD
+  if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(str)) {
+    const parts = str.split('/')
+    str = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`
+  }
+  const d = new Date(str + 'T00:00:00Z')
+  if (isNaN(d.getTime())) return null
   const epoch = new Date(Date.UTC(1899, 11, 30))
   return Math.round((d - epoch) / 86400000)
 }

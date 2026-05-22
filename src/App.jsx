@@ -1,14 +1,16 @@
 import { BrowserRouter, Routes, Route, NavLink } from 'react-router-dom'
+import ExecutiveOverview from './pages/ExecutiveOverview'
 import Dashboard from './pages/Dashboard'
 import EmployeeList from './pages/EmployeeList'
 import TrainingList from './pages/TrainingList'
 import CrudPage from './pages/CrudPage'
 
 const navItems = [
-  { to: '/',           label: '📊 Dashboard'      },
-  { to: '/employees',  label: '👥 Data Karyawan'   },
-  { to: '/training',   label: '🎓 Training'         },
-  { to: '/crud',       label: '✏️ Input / Edit'     },
+  { to: '/executive',  label: '📈 Executive Overview' },
+  { to: '/',           label: '📊 Dashboard'           },
+  { to: '/employees',  label: '👥 Data Karyawan'        },
+  { to: '/training',   label: '🎓 Training'              },
+  { to: '/crud',       label: '✏️ Input / Edit'          },
 ]
 
 export default function App() {
@@ -47,6 +49,7 @@ export default function App() {
         {/* Main */}
         <main className="flex-1 overflow-auto">
           <Routes>
+            <Route path="/executive" element={<ExecutiveOverview />} />
             <Route path="/"          element={<Dashboard />} />
             <Route path="/employees" element={<EmployeeList />} />
             <Route path="/training"  element={<TrainingList />} />

@@ -1,21 +1,24 @@
 export default function FilterBar({ filters, onChange, activeData, logData }) {
   const all = [...(activeData || []), ...(logData || [])]
 
-  const unique = (col, parent = {}) => ['All', ...[...new Set(
-    all.filter(r =>
-      (!parent.opg  || parent.opg  === 'All' || r.opg     === parent.opg) &&
-      (!parent.proj || parent.proj === 'All' || r.project  === parent.proj)
-    ).map(r => r[col]).filter(Boolean)
-  )].sort()]
+  const unique = (col, parent = {}) => {
+    const vals = [...new Set(
+      all.filter(r =>
+        (!parent.opg  || parent.opg  === 'All' || r.opg     === parent.opg) &&
+        (!parent.proj || parent.proj === 'All' || r.project  === parent.proj)
+      ).map(r => r[col]).filter(v => Boolean(v) && v !== 'All') // filter out kosong & 'All'
+    )].sort()
+    return ['All', ...vals]
+  }
 
   const sel = (id, val) => {
     const reset = {}
     if (id === 'opg') reset.proj = 'All'
     if (id === 'opg' || id === 'proj') {
-      reset.pos = 'All'
+      reset.pos     = 'All'
       reset.channel = 'All'
-      reset.skill = 'All'
-      reset.site = 'All'
+      reset.skill   = 'All'
+      reset.site    = 'All'
     }
     onChange({ ...filters, [id]: val, ...reset })
   }
@@ -39,7 +42,9 @@ export default function FilterBar({ filters, onChange, activeData, logData }) {
             onChange={e => sel(id, e.target.value)}
             className="h-8 px-2 text-xs border border-gray-200 rounded-lg bg-white text-gray-700 min-w-[110px]"
           >
-            {opts.map(o => <option key={o}>{o}</option>)}
+            {opts.map((o, i) => (
+              <option key={`${id}-${o}-${i}`} value={o}>{o}</option>
+            ))}
           </select>
         </div>
       ))}
